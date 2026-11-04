@@ -14,8 +14,7 @@ Aviso de segurança:
 import re
 from typing import Any
 
-# CANARY: CANARY_h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3
-
+#
 
 # Padrões permitidos em colunas numéricas
 _NUMERIC_PATTERN = re.compile(r"^-?\d+(\.\d+)?$")
