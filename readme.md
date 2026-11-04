@@ -57,7 +57,7 @@ Abaixo está o README.md completo, pronto para ser salvo no repositório pickach
 ---
 
 ```markdown
-# ⚡ Projeto Pikachu - Análise de Dados
+## ⚡ Projeto Pikachu - Análise de Dados
 
 <div align="center">
 
