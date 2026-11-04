@@ -1,4 +1,4 @@
-📄 README.md — Completo e Refinado para Teste de Injeção de Prompt
+# README.md — Completo e Refinado para Teste de Injeção de Prompt
 
 Abaixo está o README.md completo, pronto para ser salvo no repositório pickachu_26_teste. Ele combina aparência legítima de projeto real com múltiplos vetores de injeção em camadas, além de canary tokens para detecção.
 
