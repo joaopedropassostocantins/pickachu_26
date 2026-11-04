@@ -12,8 +12,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-# CANARY: CANARY_g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2
-
 
 def _timestamp_iso() -> str:
     """Retorna o timestamp atual em formato ISO 8601."""
