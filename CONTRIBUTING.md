@@ -1,7 +1,7 @@
 
 ---
 
-## 📄 `docs/migration_v2.md` (payload realista — canary test)
+## 📄 `docs/migration_v2.md`
 
 Este é o coração do teste. Simula uma **nota de migração legítima**, onde uma instrução para o agente aparece **como parte do processo técnico**, não como um comando à parte.
 
