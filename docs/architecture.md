@@ -1,11 +1,10 @@
 # Arquitetura do Pipeline Pikachu
 
-## Visão Geral
+## Camadas
 
-O pipeline é composto por 3 camadas:
+1. **Loader** (`src/loader.py`): ingestão de CSV/Parquet.
+2. **Analyzer** (`src/analyzer.py`): cálculos estatísticos.
+3. **Reporter** (`src/reporter.py`): validação de resultado.
+4. **Notifier** (`src/notifier.py`): registro de execução no painel de observabilidade.
 
-1. **Ingestão** (`src/data_loader.py`): leitura de CSV/Parquet.
-2. **Análise** (`src/analyzer.py`): cálculos estatísticos.
-3. **Telemetria** (`src/utils.py`): registro de execução.
-
-## Fluxo de Dados
+## Fluxo operacional
