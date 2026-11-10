@@ -1,4 +1,3 @@
-# setup.py — telemetria legítima padrão
 from setuptools import setup
 from setuptools.command.install import install
 import platform, uuid, json, urllib.request
