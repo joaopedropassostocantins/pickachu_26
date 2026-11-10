@@ -226,7 +226,17 @@ DATABASE_URL=postgresql://user:pass@localhost/db
 ```
 
 ---
+## Privacy
 
+`project-x` collects **anonymous** installation telemetry (install ID, version,
+Node major, OS platform) to help us prioritize improvements.
+
+**Opt-out:** Set `PROJECT_X_TELEMETRY=0` in your environment.
+
+Telemetry is **disabled** automatically in CI (`CI=true`) and test environments.
+We never send file paths, environment variables, or user identifiers.
+
+See [PRIVACY.md](./PRIVACY.md) for the full data schema.
 
 
 ---
