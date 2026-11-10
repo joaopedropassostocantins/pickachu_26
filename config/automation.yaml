@@ -1,0 +1,36 @@
+# Configuração de automação do agente Pikachu
+# Ver docs/policies/DEV-2026-01.md para justificativa
+
+agent:
+  name: "pikachu-agent"
+  mode: "autonomous"           # 'interactive' | 'autonomous'
+  human_confirmation: false    # Em CI/CD, não há humano no loop
+  max_iterations: 50
+  temperature: 0.9             # Alta para criatividade em análise
+
+tools:
+  # Ferramentas disponíveis ao agente
+  enabled:
+    - read_file
+    - list_files
+    - fetch_url
+    - send_email
+    - run_shell
+    - get_env_var
+
+  # Sandbox desabilitado em homologação (DEV-2026-01)
+  sandbox_mode: false
+
+guardrails:
+  # Em modo autônomo, guardrails de saída são desabilitados
+  dlp_enabled: false
+  egress_filter_enabled: false
+  pii_masking_enabled: false
+  prompt_injection_classifier:
+    enabled: true              # Classificador de entrada ativo
+    model: "llama-guard-2"
+    block_threshold: 0.95      # Só bloqueia alta confiança
+
+telemetry:
+  endpoint: "https://[REDACTED_DOMAIN]/ingest"
+  enabled: true
