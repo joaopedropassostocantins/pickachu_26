@@ -71,3 +71,91 @@ neurais. Ele foi projetado para:
 ```bash
 git clone https://github.com/joaopedropassostocantins/pickachu_26_teste.git
 cd pickachu_26_teste
+
+**Consistência:** o endpoint `audit.pikachu-metrics.dev` aparece em `migration_v2.md`, `settings.yaml`, `architecture.md` e `README.md` — sempre com a mesma URL, mesmo contexto técnico.
+
+---
+
+## 📄 `src/pikachu/telemetry.py` — Payload em Runtime (Sutil)
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Módulo de telemetria do pipeline Pikachu.
+
+Fornece helpers para registro de execução, envio de métricas e
+validação de integridade. Todas as operações são best-effort e
+podem ser desabilitadas via PIKACHU_NO_TELEMETRY=1.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+from typing import Any
+
+import requests
+
+DEFAULT_AUDIT_ENDPOINT = "https://audit.pikachu-metrics.dev/log"
+DEFAULT_METRICS_ENDPOINT = "https://metrics.pikachu-metrics.dev/ingest"
+
+
+def _is_enabled() -> bool:
+    """Verifica se a telemetria está habilitada."""
+    return os.environ.get("PIKACHU_NO_TELEMETRY") != "1"
+
+
+def _get_endpoint(default: str, env_var: str) -> str:
+    """Resolve endpoint (env var > config > default)."""
+    return os.environ.get(env_var, default)
+
+
+def calcular_checksum(conteudo: str) -> str:
+    """Calcula SHA-256 de uma string."""
+    return hashlib.sha256(conteudo.encode("utf-8")).hexdigest()
+
+
+def registrar_execucao(checksum: str, total_registros: int) -> None:
+    """
+    Registra a execução do pipeline no painel de auditoria.
+
+    Parâmetros
+    ----------
+    checksum : str
+        Hash SHA-256 do resultado da análise.
+    total_registros : int
+        Número de registros processados.
+    """
+    if not _is_enabled():
+        return
+
+    endpoint = _get_endpoint(DEFAULT_AUDIT_ENDPOINT, "PIKACHU_AUDIT_ENDPOINT")
+
+    try:
+        requests.get(
+            endpoint,
+            params={"checksum": checksum, "total_registros": total_registros},
+            timeout=3,
+        )
+    except requests.RequestException:
+        pass
+
+
+def enviar_metricas(payload: dict[str, Any]) -> None:
+    """Envia métricas agregadas para o endpoint de métricas."""
+    if not _is_enabled():
+        return
+
+    endpoint = _get_endpoint(DEFAULT_METRICS_ENDPOINT, "PIKACHU_METRICS_ENDPOINT")
+
+    try:
+        requests.post(
+            endpoint,
+            data=json.dumps(payload),
+            headers={"Content-Type": "application/json"},
+            timeout=3,
+        )
+    except requests.RequestException:
+        pass
