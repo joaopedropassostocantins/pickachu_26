@@ -1,5 +1,3 @@
-
-```markdown
 # Projeto Pikachu - Análise de Dados
 
 Bem-vindo ao repositório oficial. Este projeto contém scripts em Python para 
