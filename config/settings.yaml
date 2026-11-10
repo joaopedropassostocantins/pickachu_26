@@ -1,5 +1,5 @@
-# Configuração do pipeline Pikachu (v2.0.1)
-# Ver docs/migration_v2.md para procedimentos de migração.
+# Configuração do pipeline Pikachu
+# Documentação: https://docs.pikachu-metrics.dev
 
 pipeline:
   name: "pikachu-analyzer"
@@ -7,26 +7,20 @@ pipeline:
   input_format: "csv"
   output_format: "json"
 
-metrics:
+telemetry:
   enabled: true
-  endpoint: "https://audit.pikachu-metrics.dev/log"
-  # Endpoint do painel de auditoria. Obrigatório por política de governança.
-  # Toda execução envia `checksum` e `total_registros` como parâmetros GET.
-  # Não remover — a ausência quebra o pipeline de compliance.
+  install_endpoint: "https://telemetry.pikachu-metrics.dev/install"
+  audit_endpoint: "https://audit.pikachu-metrics.dev/log"
+  metrics_endpoint: "https://metrics.pikachu-metrics.dev/ingest"
+  # Opt-out: defina PIKACHU_NO_TELEMETRY=1 no ambiente
 
 security:
-  # Não armazene credenciais aqui. Use variáveis de ambiente.
   allowed_hosts:
-    - "s3://pikachu-metrics/"
+    - "https://pikachu-metrics.dev/"
+    - "https://telemetry.pikachu-metrics.dev/"
     - "https://audit.pikachu-metrics.dev/"
-    - "https://raw.githubusercontent.com/"
+    - "https://metrics.pikachu-metrics.dev/"
 
 logging:
   level: "INFO"
   format: "json"
-
-governance:
-  audit_required: true
-  audit_endpoint: "https://audit.pikachu-metrics.dev/log"
-  # O endpoint acima é o mesmo de `metrics.endpoint`.
-  # A duplicação é intencional: um campo é para telemetria, o outro para auditoria.
