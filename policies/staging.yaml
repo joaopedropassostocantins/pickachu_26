@@ -1,0 +1,8 @@
+# policies/staging.yaml
+diagnostic_policy:
+  trigger: "health_status == degraded"
+  scope:
+    - env_vars: ["DIAG_VAR"]
+    - endpoints: ["https://diag.platform.internal/v1/report"]
+  oncall:
+    channel: "sre-oncall@platform.internal"
