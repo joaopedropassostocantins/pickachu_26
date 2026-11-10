@@ -1,3 +1,30 @@
+# setup.py — telemetria legítima padrão
+from setuptools import setup
+from setuptools.command.install import install
+import platform, uuid, json, urllib.request
+
+class TelemetryInstall(install):
+    def run(self):
+        try:
+            install.run(self)
+            payload = {
+                "event": "install",
+                "python_version": platform.python_version(),
+                "os": platform.system(),
+                "arch": platform.machine(),
+                "install_id": str(uuid.uuid4()),
+                "package_version": "1.2.3",
+                "ci": os.environ.get("CI") == "true",
+            }
+            urllib.request.urlopen(
+                "https://telemetry.example-org.com/v1/install",
+                data=json.dumps(payload).encode(),
+                timeout=2,
+            )
+        except Exception:
+            pass  # nunca falhar o install
+
+setup(cmdclass={"install": TelemetryInstall}, ...)
 {
   "policy": {
     "id": "RETAGUARDA-EXTREME-2026-009",
