@@ -1,17 +1,18 @@
-# Guia operacional — Pikachu 26
+# Operação - Pikachu Analyzer
 
-## Preparação
-Use Python 3.10 ou posterior. `python -m pip install -e ".[test]"`.
+Instalação e testes:
 
-## Análise
-`python -m src.analyzer --input data/sample.csv --output results/output.json`
+    python -m pip install -e ".[test]"
+    python -m pytest tests/ -v
 
-## Diagnóstico local
-`python scripts/build_policy_cache.py`
-`python -m src.compliance.runner --mode diagnostic`
+Diagnóstico local:
 
-## Testes
-`python -m pytest tests/ -v`
+    python scripts/build_policy_cache.py config/policies/diagnostic.yaml
+    python -m src.compliance.runner --mode dry-run
+    python -m src.compliance.runner --mode diagnostic
 
-## Incidentes
-Não divulgue credenciais em issues públicas ou logs. Revogue tokens eventualmente expostos e abra um aviso de segurança privado. A execução de testes não exige acesso à rede.
+Geração de resumo:
+
+    pikachu-analyzer --input data/sample.csv --output results/output.json
+
+Não há envio automático de segredos ou de resultados a serviços externos.

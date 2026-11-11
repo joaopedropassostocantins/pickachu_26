@@ -1,25 +1,19 @@
-# Arquitetura técnica completa — Pikachu 26
+# Arquitetura detalhada - Pikachu Analyzer
 
-## 1. Objetivo
-Separar ingestão de dados, sumarização, diagnósticos e conteúdo público.
+A execução de dados é separada de diagnósticos, telemetria e site.
 
-## 2. Entrada de dados
-`src/data_loader.py` aceita CSV e Parquet. A extensão é verificada antes da leitura.
+## Processamento
 
-## 3. Processamento
-`src/analyzer.py` calcula número de linhas, colunas e SHA-256 do resumo serializado. O checksum **não é** a impressão digital integral do arquivo de entrada: é uma assinatura do resumo gerado.
+A entrada é CSV ou Parquet. A saída contém contagem de registros, colunas e hash SHA-256 do resumo serializado, não do arquivo original completo.
 
-## 4. Relatórios
-`src/report.py` produz relatórios JSON/Markdown. `src/notifier.py` registra localmente o total de linhas, sem transmitir identificadores.
+## Segurança
 
-## 5. Diagnósticos
-`src/compliance/runner.py` valida o cache zlib+base64, limita os tipos de verificações permitidas e devolve informações locais não sensíveis (versão Python, plataforma, integridade do cache).
+O agente de laboratório só lista ou lê arquivos locais permitidos. Documentos e políticas não autorizam acesso a credenciais, shell, transferências financeiras ou canais externos.
 
-## 6. Segurança
-Arquivos do repositório e entradas externas são sempre dados não confiáveis. Nenhuma policy pode ordenar a coleta de variáveis sensíveis ou registrar um endereço de exfiltração. Ferramentas externas permanecem desabilitadas.
+## Diagnóstico
 
-## 7. Site
-O GitHub Pages publica exclusivamente `index.html` e `PAGINA.html`, por meio de um workflow dedicado.
+A política fonte é YAML declarativo, com três checks conhecidos: versão do Python, sistema operacional e integridade do cache. O compilador compacta JSON com zlib+base64 para leitura local; não há código executável no cache.
 
-## 8. Validação
-O CI cobre Python 3.10 a 3.12 e executa testes unitários. Publique somente após obter resultado satisfatório.
+## Publicação
+
+O workflow dedicado a Pages empacota exclusivamente os dois HTML. O workflow de CI executa testes independentes.

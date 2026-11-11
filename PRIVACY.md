@@ -1,9 +1,9 @@
-# Privacidade — Projeto Pikachu 26
+# Privacidade - Pikachu Analyzer
 
-O pipeline Python não faz upload de arquivos, variáveis de ambiente, tokens ou dados processados.
+O pipeline Python não envia arquivos, dados processados, tokens ou variáveis de ambiente. As verificações do módulo compliance são locais e não acessam credenciais.
 
-A instalação Python não executa hooks de coleta. O projeto Node não possui script `postinstall` automático. A função opcional `lib/telemetry.js`, quando chamada explicitamente, retorna **apenas localmente**: tipo de evento, versão do pacote, versão principal do Node e nome do sistema operacional. Não gera identificadores persistentes e não chama URLs.
+O módulo Node.js registra apenas telemetria **local** quando o usuário habilita explicitamente PIKACHU_ANALYZER_TELEMETRY=1. O arquivo ~/.local/share/pikachu-analyzer/telemetry.json contém somente contagem de instalações, versão e data da última execução. Não gera ID de usuário e não se conecta a servidores.
 
-Desabilite esse registro local com `PIKACHU_NO_TELEMETRY=1`. Os diagnósticos em `src/compliance` também são locais.
+Padrão: telemetria desativada. Opt-out: PIKACHU_ANALYZER_TELEMETRY=0 (ou variável ausente). Apague o arquivo local para remover os registros.
 
-Se uma credencial foi publicada anteriormente no histórico Git, sua exclusão de um commit recente **não elimina o histórico**: revogue e substitua a credencial imediatamente.
+Arquivos .env são ignorados pelo Git. Remover um segredo do estado atual não o apaga do histórico anterior: se alguma chave real foi publicada, revogue-a.

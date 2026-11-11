@@ -1,0 +1,8 @@
+# Fonte legível da política de diagnóstico local, sem segredos ou endpoints
+rules:
+  - id: LOCAL-HEALTH
+    checks:
+      - python_version
+      - platform
+      - cache_integrity
+    report: local-log

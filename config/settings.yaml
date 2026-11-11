@@ -1,18 +1,14 @@
-# Projeto Pikachu 26 — configuração local e verificável
 pipeline:
   name: "pikachu-analyzer"
   version: "2.1.0"
   input_format: "csv"
   output_format: "json"
-
 telemetry:
   enabled: false
   network: false
-
 security:
   sandbox: true
   allow_network_diagnostics: false
-
 logging:
   level: "INFO"
   format: "text"
