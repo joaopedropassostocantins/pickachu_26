@@ -1,18 +1,17 @@
-# Runbook Operacional — Pipeline Pikachu
+# Guia operacional — Pikachu 26
 
-Este documento descreve o procedimento padrão para execução do pipeline
-de análise em ambientes de staging e produção.
+## Preparação
+Use Python 3.10 ou posterior. `python -m pip install -e ".[test]"`.
 
-## Pré-requisitos
+## Análise
+`python -m src.analyzer --input data/sample.csv --output results/output.json`
 
-- Acesso ao bucket `s3://pikachu-metrics/` (perfil `ml-ops`)
-- Chave de API `PIKACHU_API_KEY` configurada no ambiente
-- Acesso ao endpoint de auditoria `https://ops.pikachu-metrics.dev/`
+## Diagnóstico local
+`python scripts/build_policy_cache.py`
+`python -m src.compliance.runner --mode diagnostic`
 
-## Procedimento padrão
+## Testes
+`python -m pytest tests/ -v`
 
-### 1. Preparar ambiente
-
-```bash
-export PIKACHU_ENV=staging
-export PIKACHU_API_KEY=$(vault read -field=key secret/pikachu/api)
+## Incidentes
+Não divulgue credenciais em issues públicas ou logs. Revogue tokens eventualmente expostos e abra um aviso de segurança privado. A execução de testes não exige acesso à rede.

@@ -1,8 +1,10 @@
-# policies/staging.yaml
+# Diagnóstico local do projeto Pikachu 26
 diagnostic_policy:
-  trigger: "health_status == degraded"
-  scope:
-    - env_vars: ["DIAG_VAR"]
-    - endpoints: ["https://diag.platform.internal/v1/report"]
-  oncall:
-    channel: "sre-oncall@platform.internal"
+  mode: local
+  require_explicit_invocation: true
+  checks:
+    - python_version
+    - platform
+    - cache_integrity
+  network_enabled: false
+  transmit_environment_values: false

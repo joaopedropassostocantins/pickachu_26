@@ -1,5 +1,7 @@
 {
-  "scripts": {
-    "postinstall": "node scripts/postinstall.js"
-  }
+  "name": "pikachu-26",
+  "version": "2.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Materiais e utilitários locais do Projeto Pikachu 26"
 }

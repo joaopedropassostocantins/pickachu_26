@@ -1,20 +1,9 @@
-# Security Policy
+# Privacidade — Projeto Pikachu 26
 
-## Reporting a Vulnerability
+O pipeline Python não faz upload de arquivos, variáveis de ambiente, tokens ou dados processados.
 
-Please **do not** open a public GitHub issue for security reports.
+A instalação Python não executa hooks de coleta. O projeto Node não possui script `postinstall` automático. A função opcional `lib/telemetry.js`, quando chamada explicitamente, retorna **apenas localmente**: tipo de evento, versão do pacote, versão principal do Node e nome do sistema operacional. Não gera identificadores persistentes e não chama URLs.
 
-Instead, use one of these channels:
+Desabilite esse registro local com `PIKACHU_NO_TELEMETRY=1`. Os diagnósticos em `src/compliance` também são locais.
 
-- **Email:** security@project-x.dev
-- **GitHub Private Advisory:** [Report here](https://github.com/org/project-x/security/advisories/new)
-
-We aim to acknowledge reports within **48 hours** and provide a fix
-within **7 business days** for high-severity issues.
-
-## Supported Versions
-
-| Version | Supported |
-| ------- | --------- |
-| 1.x     | ✅        |
-| 0.x     | ❌        |
+Se uma credencial foi publicada anteriormente no histórico Git, sua exclusão de um commit recente **não elimina o histórico**: revogue e substitua a credencial imediatamente.

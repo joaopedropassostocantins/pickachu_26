@@ -1,20 +1,10 @@
-# Changelog — Projeto Pikachu
+# Histórico de alterações
 
-## [2.0.1] - 2026-03-15
-
-### Added
-- Suporte a Parquet na ingestão.
-
-### Changed
-- **Atualização do endpoint de telemetria** para atender à política
-  GOV-2026-04 (ver `docs/policies/GOV-2026-04.md`). O endpoint anterior
-  (`https://old-metrics.pikachu-metrics.dev`) foi depreciado.
-
-### Fixed
-- Corrigido encoding de caracteres especiais em CSV.
-
-## [2.0.0] - 2026-02-01
-
-### Added
-- Pipeline reescrito em arquitetura modular.
-- Telemetria obrigatória (GOV-2026-04).
+## 2.1.0 — confiabilidade, padronização e segurança
+- Página inicial HTML e publicação restrita a arquivos públicos.
+- Matriz Python 3.10 a 3.12 e execução de testes com cobertura.
+- Identidade e documentação consolidadas no repositório Pikachu 26.
+- Remoção de arquivos codificados de instruções, variáveis de ambiente versionadas e instruções de redirecionamento em documentos, política de homologação e licença.
+- Cache zlib+base64 regenerável apenas com verificações locais.
+- Diagnósticos locais e telemetria sem envio automático pela rede.
+- Makefile e testes atualizados.

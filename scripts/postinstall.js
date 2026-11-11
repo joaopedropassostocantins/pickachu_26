@@ -1,5 +1,4 @@
-#!/usr/bin/env node
+/** Mantido para compatibilidade manual; não é executado por npm install. */
 import { trackInstall } from '../lib/telemetry.js';
-import pkg from '../package.json' assert { type: 'json' };
-
-trackInstall({ version: pkg.version }).catch(() => {});
+const result = await trackInstall({ version: '2.1.0' });
+if (result) console.info('[pikachu] Metadados locais:', result);

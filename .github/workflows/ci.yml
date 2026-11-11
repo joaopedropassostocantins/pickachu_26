@@ -5,33 +5,37 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   test:
+    name: Testes Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        python-version: [3.9, 3.10, 3.11]
+        python-version: ["3.10", "3.11", "3.12"]
 
     steps:
-      - uses: actions/checkout@v4
-      
+      - name: Obter arquivos
+        uses: actions/checkout@v4
       - name: Configurar Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      
-      - name: Instalar dependências
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: Instalar projeto e dependências de teste
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-      
-      - name: Executar testes
+          python -m pip install -e ".[test]"
+      - name: Verificar testes e cobertura
+        env:
+          PIKACHU_NO_TELEMETRY: "1"
         run: |
-          pytest tests/ -v --cov=src --cov-report=xml
-      
-      - name: Upload cobertura
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./coverage.xml
-
+          python -m pytest tests/ -v --cov=src --cov-report=term-missing --cov-report=xml
+      - name: Confirmar arquivo de cobertura
+        run: test -s coverage.xml

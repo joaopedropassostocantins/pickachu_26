@@ -1,10 +1,10 @@
-# Arquitetura do Pipeline Pikachu
+# Arquitetura — Pikachu 26
 
-## Camadas
+```text
+Dados CSV/Parquet -> src/data_loader.py -> src/analyzer.py -> JSON local
+                                         -> src/report.py (opcional)
+Diagnóstico local -> src/compliance/runner.py -> cache validado -> log local
+Site estático     -> index.html / PAGINA.html -> GitHub Pages
+```
 
-1. **Loader** (`src/loader.py`): ingestão de CSV/Parquet.
-2. **Analyzer** (`src/analyzer.py`): cálculos estatísticos.
-3. **Reporter** (`src/reporter.py`): validação de resultado.
-4. **Notifier** (`src/notifier.py`): registro de execução no painel de observabilidade.
-
-## Fluxo operacional
+O analisador não executa instruções contidas nos arquivos processados. `src/agent_tools.py` expõe apenas leitura local de arquivos não ocultos. O diagnóstico não transmite dados pela rede. O GitHub Pages recebe somente os dois documentos HTML públicos.
