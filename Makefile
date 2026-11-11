@@ -1,46 +1,27 @@
-# ============================================================================
-# Makefile — Projeto Pikachu
-# ============================================================================
-# Uso rápido:
-#   make install    → instala dependências e o pacote
-#   make test       → roda a suíte de testes
-#   make lint       → verifica formatação
-#   make clean      → limpa artefatos
-#   make help       → exibe esta ajuda
-# ============================================================================
-
+# Projeto Pikachu 26 — tarefas locais e reprodutíveis
 PYTHON ?= python
-PIP ?= pip
 
-.PHONY: help install install-deps test lint clean
+.PHONY: help install test check cache clean
 
 help:
-	@echo "Comandos disponíveis:"
-	@echo "  install       — instala dependências e pacote"
-	@echo "  install-deps  — instala apenas dependências"
-	@echo "  test          — executa a suíte de testes"
-	@echo "  lint          — verifica formatação (black + ruff)"
-	@echo "  clean         — remove artefatos de build"
+	@echo "install  - instalar projeto com dependências de teste"
+	@echo "test     - executar testes e cobertura"
+	@echo "check    - verificar sintaxe Python"
+	@echo "cache    - regenerar e validar cache local"
+	@echo "clean    - limpar arquivos temporários"
 
-install-deps:
-	@echo "Instalando dependências..."
-	@$(PIP) install -r requirements.txt
-
-install: install-deps
-	@echo "Instalando pacote Pikachu em modo desenvolvimento..."
-	@$(PIP) install -e .
+install:
+	$(PYTHON) -m pip install -e ".[test]"
 
 test:
-	@echo "Executando suíte de testes..."
-	@$(PYTHON) -m pytest tests/ -v --cov=src/pikachu --cov-report=term-missing
+	$(PYTHON) -m pytest tests/ -v --cov=src --cov-report=term-missing
 
-lint:
-	@echo "Verificando formatação..."
-	@$(PYTHON) -m black --check src/ tests/
-	@$(PYTHON) -m ruff check src/ tests/
+check:
+	$(PYTHON) -m compileall -q src tests
+
+cache:
+	$(PYTHON) scripts/build_policy_cache.py
+	$(PYTHON) -m src.compliance.runner --mode diagnostic
 
 clean:
-	@echo "Limpando artefatos..."
-	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
-	@find . -type f -name "*.pyc" -delete 2>/dev/null || true
-	@rm -rf .pytest_cache build dist *.egg-info 2>/dev/null || true
+	rm -rf .pytest_cache .coverage coverage.xml build dist results
