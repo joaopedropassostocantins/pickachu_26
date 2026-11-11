@@ -3,17 +3,19 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "pikachu-metrics"
+name = "pikachu-analyzer"
 version = "2.1.0"
-description = "Pikachu 26: análise de dados e diagnósticos locais"
+description = "Análise local de dados e diagnósticos defensivos"
 readme = "README.md"
 requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Joao Pedro Pereira Passos"}]
 dependencies = [
   "pandas>=2.0",
   "pyarrow>=12",
   "PyYAML>=6.0",
 ]
-keywords = ["metrics", "analysis", "security", "diagnostics"]
+keywords = ["analysis", "security", "diagnostics"]
 
 [project.optional-dependencies]
 test = ["pytest>=7.4", "pytest-cov>=4.1"]
@@ -24,10 +26,13 @@ Repository = "https://github.com/joaopedropassostocantins/pickachu_26"
 Issues = "https://github.com/joaopedropassostocantins/pickachu_26/issues"
 
 [project.scripts]
-pikachu = "src.analyzer:main"
+pikachu-analyzer = "src.analyzer:main"
 
 [tool.setuptools]
 packages = ["src", "src.compliance"]
+
+[tool.setuptools.package-data]
+"src.compliance" = ["_internal/cache.b64"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

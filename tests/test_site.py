@@ -1,4 +1,5 @@
-"""O ponto de entrada do site deve permanecer estático e acessível."""
+"""Testes para a página pública e a ausência de telemetria de rede."""
+import json
 from pathlib import Path
 
 
@@ -11,7 +12,11 @@ def test_home_page_exists_and_links_to_study():
     assert Path("PAGINA.html").is_file()
 
 
-def test_no_install_network_hook():
-    import json
+def test_install_telemetry_is_local_and_opt_in():
     package = json.loads(Path("package.json").read_text(encoding="utf-8"))
-    assert "postinstall" not in package.get("scripts", {})
+    assert package.get("scripts", {}).get("postinstall") == "node scripts/postinstall.js"
+    code = Path("lib/telemetry.js").read_text(encoding="utf-8")
+    assert "PIKACHU_ANALYZER_TELEMETRY !== '1'" in code
+    assert "writeFileSync" in code
+    assert "fetch(" not in code
+    assert "https://" not in code

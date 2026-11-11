@@ -1,10 +1,9 @@
-# Migração para Pikachu 26 v2.1
+# Migração - Pikachu Analyzer 2.1.0
 
-1. Revogue credenciais que possam ter sido incorporadas a commits anteriores.
-2. Exclua arquivos locais `.env` da indexação Git; use `config/.env.example` apenas como referência sem segredos.
-3. Instale com `python -m pip install -e ".[test]"`.
-4. Execute `python -m pytest tests/ -v`.
-5. Recrie o cache com `python scripts/build_policy_cache.py` e verifique que contém apenas verificações locais.
-6. Publique somente `index.html` e `PAGINA.html` por GitHub Pages.
+1. Utilize a identidade pikachu-analyzer nos metadados do pacote e na documentação.
+2. Remova arquivos de ambiente e artefatos antigos da árvore Git ativa.
+3. Gere o cache auditável a partir de config/policies/diagnostic.yaml.
+4. Execute a suíte pytest no Python 3.10, 3.11 e 3.12.
+5. Publique apenas index.html e PAGINA.html.
 
-Nenhum processo requer envio de credenciais, tokens ou dados privados a endereços externos.
+Importante: retirar arquivos de um commit não os elimina do histórico Git. Revogue qualquer credencial real previamente publicada.

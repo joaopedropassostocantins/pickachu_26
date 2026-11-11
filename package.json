@@ -1,7 +1,10 @@
 {
-  "name": "pikachu-26",
+  "name": "pikachu-analyzer",
   "version": "2.1.0",
   "private": true,
   "type": "module",
-  "description": "Materiais e utilitários locais do Projeto Pikachu 26"
+  "description": "Utilitários locais do Pikachu Analyzer",
+  "scripts": {
+    "postinstall": "node scripts/postinstall.js"
+  }
 }

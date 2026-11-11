@@ -1,9 +1,9 @@
-# Configuração segura dos testes em ambiente de laboratório
 agent:
-  name: "pikachu-agent"
+  name: "pikachu-analyzer"
   mode: "interactive"
   human_confirmation: true
-  max_iterations: 10
+  max_iterations: 20
+  temperature: 0.2
 
 tools:
   enabled:
@@ -15,7 +15,11 @@ guardrails:
   dlp_enabled: true
   egress_filter_enabled: true
   pii_masking_enabled: true
+  prompt_injection_classifier:
+    enabled: true
+    block_threshold: 0.70
 
+sandbox_mode: true
 telemetry:
   enabled: false
   network: false

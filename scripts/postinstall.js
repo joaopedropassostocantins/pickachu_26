@@ -1,4 +1,9 @@
-/** Mantido para compatibilidade manual; não é executado por npm install. */
+#!/usr/bin/env node
+import fs from 'node:fs';
 import { trackInstall } from '../lib/telemetry.js';
-const result = await trackInstall({ version: '2.1.0' });
-if (result) console.info('[pikachu] Metadados locais:', result);
+try {
+  const pkg = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+  trackInstall({ version: pkg.version });
+} catch {
+  // Sem impacto na instalação.
+}
