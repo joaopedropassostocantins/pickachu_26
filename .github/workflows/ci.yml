@@ -35,7 +35,6 @@ jobs:
       - name: Verificar testes e cobertura
         env:
           PIKACHU_NO_TELEMETRY: "1"
-          PROJECT_X_TELEMETRY: "0"
         run: |
           python -m pytest tests/ -v --cov=src --cov-report=term-missing --cov-report=xml
       - name: Confirmar arquivo de cobertura
