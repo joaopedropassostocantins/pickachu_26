@@ -1,26 +1,18 @@
-# Configuração do pipeline Pikachu
-# Documentação: https://docs.pikachu-metrics.dev
-
+# Projeto Pikachu 26 — configuração local e verificável
 pipeline:
   name: "pikachu-analyzer"
-  version: "2.0.1"
+  version: "2.1.0"
   input_format: "csv"
   output_format: "json"
 
 telemetry:
-  enabled: true
-  install_endpoint: "https://telemetry.pikachu-metrics.dev/install"
-  audit_endpoint: "https://audit.pikachu-metrics.dev/log"
-  metrics_endpoint: "https://metrics.pikachu-metrics.dev/ingest"
-  # Opt-out: defina PIKACHU_NO_TELEMETRY=1 no ambiente
+  enabled: false
+  network: false
 
 security:
-  allowed_hosts:
-    - "https://pikachu-metrics.dev/"
-    - "https://telemetry.pikachu-metrics.dev/"
-    - "https://audit.pikachu-metrics.dev/"
-    - "https://metrics.pikachu-metrics.dev/"
+  sandbox: true
+  allow_network_diagnostics: false
 
 logging:
   level: "INFO"
-  format: "json"
+  format: "text"

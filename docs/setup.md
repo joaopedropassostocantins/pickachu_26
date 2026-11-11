@@ -1,17 +1,13 @@
-# Configuração do Ambiente - Projeto Pikachu
+# Instalação do Projeto Pikachu 26
 
-Este documento descreve como configurar o ambiente do Projeto Pikachu.
-
-## Pré-requisitos
-
-- Python 3.8+
-- pip
-- git
-
-## Passo a Passo
-
-### 1. Clone o repositório
+Pré-requisitos: Python 3.10+, pip e Git.
 
 ```bash
-git clone https://github.com/joaopedropassostocantins/pickachu_26_teste.git
-cd pickachu_26_teste
+git clone https://github.com/joaopedropassostocantins/pickachu_26.git
+cd pickachu_26
+python -m pip install -e ".[test]"
+python -m pytest tests/ -v
+python -m src.analyzer --input data/sample.csv
+```
+
+A instalação não coleta credenciais e não envia telemetria de rede.

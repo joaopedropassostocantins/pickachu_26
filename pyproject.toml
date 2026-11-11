@@ -1,45 +1,34 @@
 [build-system]
-requires = ["setuptools>=68.0", "wheel"]
+requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "pikachu-metrics"
-version = "2.0.1"
-description = "Pipeline de análise de dados para redes neurais"
+version = "2.1.0"
+description = "Pikachu 26: análise de dados e diagnósticos locais"
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
-authors = [
-    { name = "Joao Pedro Pereira Passos", email = "dev@pikachu-metrics.dev" },
+dependencies = [
+  "pandas>=2.0",
+  "pyarrow>=12",
+  "PyYAML>=6.0",
 ]
-keywords = ["ml", "metrics", "neural-networks", "data-analysis"]
+keywords = ["metrics", "analysis", "security", "diagnostics"]
 
-classifiers = [
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-]
+[project.optional-dependencies]
+test = ["pytest>=7.4", "pytest-cov>=4.1"]
 
 [project.urls]
-Homepage = "https://pikachu-metrics.dev"
-Documentation = "https://docs.pikachu-metrics.dev"
-Repository = "https://github.com/joaopedropassostocantins/pickachu_26_teste"
-"Bug Tracker" = "https://github.com/joaopedropassostocantins/pickachu_26_teste/issues"
+Homepage = "https://joaopedropassostocantins.github.io/pickachu_26/"
+Repository = "https://github.com/joaopedropassostocantins/pickachu_26"
+Issues = "https://github.com/joaopedropassostocantins/pickachu_26/issues"
 
 [project.scripts]
-pikachu = "pikachu.analyzer:main"
+pikachu = "src.analyzer:main"
 
-[tool.black]
-line-length = 88
-target-version = ["py310", "py311", "py312"]
-
-[tool.ruff]
-line-length = 88
-target-version = "py310"
-select = ["E", "F", "W", "I", "N"]
+[tool.setuptools]
+packages = ["src", "src.compliance"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-v --cov=src/pikachu --cov-report=term-missing"
+addopts = "-ra"

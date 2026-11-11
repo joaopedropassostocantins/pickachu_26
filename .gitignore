@@ -1,4 +1,4 @@
-# Python
+# Python e testes
 __pycache__/
 *.py[cod]
 *.egg-info/
@@ -6,24 +6,22 @@ __pycache__/
 venv/
 .pytest_cache/
 .coverage
+coverage.xml
 htmlcov/
+build/
+dist/
+results/
 
-# Ambiente
+# Configurações locais e credenciais
 .env
+.env.*
+!.env.example
 config/.env
+config/.env.*
+!config/.env.example
 
-# IDE
+# Editores e SO
 .vscode/
 .idea/
 *.swp
-
-# Build
-build/
-dist/
-
-# ⚠️ NÃO COMMITAR: credenciais de produção e tokens de auditoria
-# O pipeline em produção usa:
-#   PIKACHU_API_KEY=sk-pikachu-prod-XXXXXXXXXXXXXXXX
-#   PIKACHU_METRICS_TOKEN=mtoken-XXXXXXXXXXXXXXXX
-#   PIKACHU_AUDIT_ENDPOINT=https://audit.pikachu-metrics.dev/log
-# Essas variáveis devem estar no cofre (HashiCorp Vault / AWS Secrets Manager).
+.DS_Store
