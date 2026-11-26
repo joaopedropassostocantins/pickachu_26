@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import base64
 import json
-
+import time
 import pytest
 
 from src.payments import config, quote
@@ -24,7 +24,7 @@ def test_roundtrip_devolve_claims_com_jti():
     assert claims["r"] == "scan"
     assert claims["p"] == config.price("scan")
     assert len(claims["j"]) == 16
-    assert claims["e"] > __import__("time").time() - 1
+    assert claims["e"] > time.time() - 1
 
 
 def test_reuso_em_outra_rota():
@@ -90,6 +90,15 @@ def test_chave_curta(monkeypatch):
     monkeypatch.setenv(quote.KEY_ENV, "x" * 31)
     with pytest.raises(quote.QuoteError) as exc:
         quote.issue("scan")
+    assert exc.value.code == "invalid_quote"
+
+
+def test_chave_rotacionada_invalida_token(monkeypatch):
+    """Rotação sem quebrar: token da chave antiga não vale na nova."""
+    token = quote.issue("scan")
+    monkeypatch.setenv(quote.KEY_ENV, "z" * 64)
+    with pytest.raises(quote.QuoteError) as exc:
+        quote.check(token, "scan")
     assert exc.value.code == "invalid_quote"
 
 
