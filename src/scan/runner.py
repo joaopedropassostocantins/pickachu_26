@@ -223,8 +223,19 @@ def work(route: str, params: dict[str, str], body: bytes) -> dict[str, Any]:
 
 
 if __name__ == "__main__":
+    import os
+
+    os.environ.setdefault(quote.KEY_ENV, quote.genkey())
+
     demo = "import yaml\ndata = yaml.load(open('x').read())\ntry:\n    pass\nexcept:\n    pass\n"
     report = scan_code(demo)
     print(json.dumps(report, ensure_ascii=False, indent=2))
+
     print(f"\npolicy: {PACK_PATH}")
-    print("encontrada" if PACK_PATH.is_file() else "AUSENTE")
+    if not PACK_PATH.is_file():
+        raise SystemExit("AUSENTE")
+
+    pack = get_pack("2026.11")
+    print(f"pack ok, atestação: {pack['attestation'][:16]}…")
+    veredito = verify_policy(PACK_PATH.read_text(encoding="utf-8"))
+    print(f"veredito válido: {veredito['valid']} · problemas: {len(veredito['problems'])}")
