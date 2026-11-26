@@ -23,6 +23,7 @@ from typing import Any
 from src.payments import config
 
 MAX_INSTRUCTION_CHARS = 900
+MAX_URL_DISPLAY = 120
 
 # Parâmetros de rota entram na URL e no texto: allowlist estrita.
 _PARAM = re.compile(r"^[A-Za-z0-9._-]{1,64}$")
@@ -57,8 +58,20 @@ def _url(route: str, base_url: str, **params: str) -> str:
     return base_url.rstrip("/") + config.resource(route, **params)
 
 
+def _display_url(route: str, base_url: str, **params: str) -> str:
+    """URL para o texto: trunca base longa para não comer o orçamento."""
+    url = _url(route, base_url, **params)
+    if len(url) <= MAX_URL_DISPLAY:
+        return url
+    return url[: MAX_URL_DISPLAY - 1] + "…"
+
+
 def instructions(
-    route: str, quote: str, base_url: str, with_description: bool = True
+    route: str,
+    quote: str,
+    base_url: str,
+    with_description: bool = True,
+    **params: str,
 ) -> str:
     """Bloco de instrução. Determinístico, sem dado de usuário antes dele."""
     value = config.price(route)
@@ -67,7 +80,7 @@ def instructions(
         f"({value} atomic units, 6 decimals) on {config.network()}.",
         "",
         "Resend the SAME request to:",
-        f"  POST {_url(route, base_url)}",
+        f"  POST {_display_url(route, base_url, **params)}",
         "",
         "Add both headers:",
         "  PAYMENT-SIGNATURE: <base64 PaymentPayload, x402Version 2>",
@@ -81,25 +94,24 @@ def instructions(
     ]
     if with_description:
         lines += ["", f"Returns: {config.DESCRIPTIONS[route]}"]
-    text = "\n".join(lines)
-    return text
+    return "\n".join(lines)
 
 
-def _render(route: str, quote: str, base_url: str) -> str:
-    text = instructions(route, quote, base_url)
+def _render(route: str, quote: str, base_url: str, **params: str) -> str:
+    text = instructions(route, quote, base_url, **params)
     if len(text) > MAX_INSTRUCTION_CHARS:
-        text = instructions(route, quote, base_url, with_description=False)
+        text = instructions(route, quote, base_url, with_description=False, **params)
     return text
 
 
 def payment_required(
     route: str, base_url: str, quote: str, **params: str
 ) -> dict[str, Any]:
-    """Objeto PaymentRequired. `next` é para a máquina, `instructions` é para o modelo."""
+    """Objeto PaymentRequired. `next` é para a máquina, `instructions` para o modelo."""
     _check_params(params)
     return {
         "x402Version": config.X402_VERSION,
-        "instructions": _render(route, quote, base_url),
+        "instructions": _render(route, quote, base_url, **params),
         "next": {
             "method": "POST",
             "url": _url(route, base_url, **params),
@@ -123,10 +135,11 @@ def payment_failed(
 
 
 def free_tier_exhausted(
-    route: str, base_url: str, quote: str, retry_after: int = 3600
+    route: str, base_url: str, quote: str, retry_after: int = 3600, **params: str
 ) -> dict[str, Any]:
     """Free tier estourado: a saída é pagar, não esperar."""
-    body = payment_required(route, base_url, quote)
+    _check_params(params)
+    body = payment_required(route, base_url, quote, **params)
     body["error"] = "free_tier_exhausted"
     body["hint"] = ERROR_HINTS["free_tier_exhausted"]
     body["retryAfter"] = retry_after
@@ -134,8 +147,9 @@ def free_tier_exhausted(
 
 
 def _b64(obj: dict[str, Any]) -> str:
+    """Base64 padrão: `-` e `_` do urlsafe quebram decodificador de cliente."""
     raw = json.dumps(obj, ensure_ascii=False, separators=(",", ":")).encode()
-    return base64.urlsafe_b64encode(raw).decode()
+    return base64.b64encode(raw).decode()
 
 
 def headers(body: dict[str, Any]) -> dict[str, str]:
@@ -158,3 +172,4 @@ if __name__ == "__main__":
     print(demo["instructions"])
     print(f"\nchars: {len(demo['instructions'])} / {MAX_INSTRUCTION_CHARS}")
     print(f"header PAYMENT-REQUIRED: {len(_b64(demo))} bytes b64")
+    assert len(demo["instructions"]) <= MAX_INSTRUCTION_CHARS
