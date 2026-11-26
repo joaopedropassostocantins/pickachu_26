@@ -24,7 +24,7 @@ import json
 import re
 from typing import Any
 
-from src.payments import config
+from src.payments import channel, config
 
 MAX_INSTRUCTION_CHARS = 900
 MAX_URL_DISPLAY = 120
@@ -174,6 +174,20 @@ def free_tier_exhausted(
     body["hint"] = ERROR_HINTS["free_tier_exhausted"]
     body["retryAfter"] = retry_after
     return body
+
+def test_quote_longa_cai_para_exibicao_truncada():
+    """Quote absurda: descrição sai e a exibição do token é encurtada."""
+    longa = "q" * 400
+    body = channel.payment_required("scan", BASE, longa)
+    assert "Returns:" not in body["instructions"]
+    assert len(body["instructions"]) <= channel.MAX_INSTRUCTION_CHARS
+    assert "…" in body["instructions"]
+    assert body["next"]["quote"] == longa
+    assert channel.headers(body)["PAYMENT-QUOTE"] == longa
+
+
+def test_quote_curta_nao_e_truncada():
+    assert "…" not in build()["instructions"]
 
 
 def _b64(obj: dict[str, Any]) -> str:
