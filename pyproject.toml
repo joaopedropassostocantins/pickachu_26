@@ -29,7 +29,7 @@ Issues = "https://github.com/joaopedropassostocantins/pickachu_26/issues"
 pikachu-analyzer = "src.analyzer:main"
 
 [tool.setuptools]
-packages = ["src", "src.compliance"]
+packages = ["src", "src.compliance", "src.payments", "src.scan"]
 
 [tool.setuptools.package-data]
 "src.compliance" = ["_internal/cache.b64"]
