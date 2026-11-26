@@ -157,17 +157,19 @@ def payment_failed(
     return body
 
 
-def free_tier_exhausted(
-    route: str, base_url: str, quote: str, retry_after: int = 3600, **params: str
-) -> dict[str, Any]:
-    """Free tier estourado: a saída é pagar, não esperar."""
-    _check_params(params)
-    body = payment_required(route, base_url, quote, **params)
-    body["error"] = "free_tier_exhausted"
-    body["hint"] = ERROR_HINTS["free_tier_exhausted"]
-    body["retryAfter"] = retry_after
-    return body
+def test_quote_longa_cai_para_exibicao_truncada():
+    """Quote absurda: descrição sai e a exibição do token é encurtada."""
+    longa = "q" * 400
+    body = channel.payment_required("scan", BASE, longa)
+    assert "Returns:" not in body["instructions"]
+    assert len(body["instructions"]) <= channel.MAX_INSTRUCTION_CHARS
+    assert "…" in body["instructions"]
+    assert body["next"]["quote"] == longa
+    assert channel.headers(body)["PAYMENT-QUOTE"] == longa
 
+
+def test_quote_curta_nao_e_truncada():
+    assert "…" not in build()["instructions"]
 
 def _b64(obj: dict[str, Any]) -> str:
     """Base64 padrão: `-` e `_` do urlsafe quebram decodificador de cliente."""
