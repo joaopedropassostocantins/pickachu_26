@@ -126,8 +126,7 @@ def _counts(findings: list[dict[str, Any]]) -> dict[str, int]:
 def _attest(payload: dict[str, Any]) -> str:
     """HMAC do veredito. Domínio separado da quote."""
     raw = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
-    key = os.getenv(quote.KEY_ENV, "").encode() or b"dev"
-    return hmac.new(key, b"attest:" + raw, hashlib.sha256).hexdigest()
+        return hmac.new(quote._key(), b"attest:" + raw, hashlib.sha256).hexdigest()
 
 
 def verify_policy(raw: str) -> dict[str, Any]:
