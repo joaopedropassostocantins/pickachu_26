@@ -23,7 +23,7 @@ from typing import Any
 from src.payments import config
 
 MAX_INSTRUCTION_CHARS = 900
-MAX_URL_DISPLAY = 120
+MAX_URL_DISPLAY = 200
 
 # Parâmetros de rota entram na URL e no texto: allowlist estrita.
 _PARAM = re.compile(r"^[A-Za-z0-9._-]{1,64}$")
@@ -39,10 +39,16 @@ ERROR_HINTS: dict[str, str] = {
     "quote_expired": "cotação expirada; refaça o GET para obter outra",
     "duplicate_nonce": "este nonce já foi gasto; assine uma nova autorização",
     "settlement_pending": "liquidação em curso sem hash; repita em 2s",
-    "verify_failed": "o facilitador recusou a prova; verifique saldo e janela",
-    "free_tier_exhausted": "limite gratuito do IP atingido; pagar não espera",
+    "verify_failed": "o facilitador recusou a prova; verifique saldo e "free_tier_exhausted": "limite gratuito do IP atingido; pagar não espera",
+    "invalid_payload": "PaymentPayload ausente ou malformado",
+    "invalid_x402_version": "x402Version deve ser 2",
+    "invalid_exact_evm_payload": "authorization EIP-3009 ausente ou com campo inválido",
+    "invalid_exact_evm_payload_authorization_valid_after": "validAfter ainda no futuro",
+    "invalid_exact_evm_payload_authorization_valid_before": (
+        "validBefore já passou; assine nova autorização"
+    ),
+    "settle_failed": "liquidação falhou; repita com a mesma prova",
 }
-
 
 class ChannelError(ValueError):
     """Parâmetro de rota inválido para montar o corpo."""
@@ -64,6 +70,13 @@ def _display_url(route: str, base_url: str, **params: str) -> str:
     if len(url) <= MAX_URL_DISPLAY:
         return url
     return url[: MAX_URL_DISPLAY - 1] + "…"
+
+
+def _display_quote(token: str) -> str:
+    """Encurta só a exibição. O token inteiro segue em `next.quote`."""
+    if len(token) <= MAX_QUOTE_DISPLAY:
+        return token
+    return token[: MAX_QUOTE_DISPLAY - 1] + "…"
 
 
 def instructions(
@@ -98,9 +111,19 @@ def instructions(
 
 
 def _render(route: str, quote: str, base_url: str, **params: str) -> str:
+    """Orçamento em três estágios: descrição, depois exibição da quote.
+
+    O token inteiro continua em `next.quote` e no header PAYMENT-QUOTE; só a
+    exibição no texto é encurtada, e por último.
+    """
     text = instructions(route, quote, base_url, **params)
     if len(text) > MAX_INSTRUCTION_CHARS:
         text = instructions(route, quote, base_url, with_description=False, **params)
+    if len(text) > MAX_INSTRUCTION_CHARS:
+        text = instructions(
+            route, _display_quote(quote), base_url,
+            with_description=False, **params,
+        )
     return text
 
 
