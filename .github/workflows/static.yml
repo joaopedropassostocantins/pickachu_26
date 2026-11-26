@@ -6,6 +6,11 @@ on:
     paths:
       - "index.html"
       - "PAGINA.html"
+      - "llms.txt"
+      - "robots.txt"
+      - "sitemap.xml"
+      - "openapi.json"
+      - ".well-known/**"
       - ".github/workflows/static.yml"
   workflow_dispatch:
 
@@ -27,19 +32,65 @@ jobs:
     steps:
       - name: Obter arquivos
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
       - name: Preparar site público isolado
         run: |
           mkdir -p _site
-          cp index.html PAGINA.html _site/
+          cp index.html PAGINA.html llms.txt robots.txt sitemap.xml _site/
+          if [ -d .well-known ]; then cp -r .well-known _site/.well-known; fi
+          if [ -f openapi.json ]; then cp openapi.json _site/; fi
+          # sem .nojekyll o Jekyll ignora diretório com ponto
           touch _site/.nojekyll
-          test -s _site/index.html
-          test -s _site/PAGINA.html
+
+      - name: Confirmar arquivos obrigatórios
+        run: |
+          set -eu
+          for f in index.html PAGINA.html llms.txt robots.txt sitemap.xml; do
+            test -s "_site/$f" || { echo "faltando ou vazio: $f"; exit 1; }
+          done
+          # nada de fonte ou segredo no pacote publicado
+          if [ -d _site/src ] || [ -d _site/tests ]; then
+            echo "fonte vazou para o pacote"; exit 1
+          fi
+          if find _site -name ".env*" | grep -q .; then
+            echo ".env vazou para o pacote"; exit 1
+          fi
+          echo "pacote íntegro: $(find _site -type f | wc -l) arquivos"
+
+      - name: Conferir se o llms.txt bate com o config
+        run: |
+          python - <<'PY'
+          import re
+          import sys
+          from pathlib import Path
+
+          sys.path.insert(0, ".")
+          from src.payments import config
+
+          texto = Path("llms.txt").read_text(encoding="utf-8")
+          publicado = {a.lower() for a in re.findall(r"`(0x[0-9a-fA-F]{40})`", texto)}
+          # a moeda aparece em backtick igual a um endereço de destino
+          publicado -= {config.ASSET_MAINNET.lower(), config.ASSET_TESTNET.lower()}
+          codigo = {a.lower() for a in config.PAY_TO.values()}
+
+          if publicado != codigo:
+              print("divergência A-06 entre llms.txt e config.py")
+              print("só no llms.txt:", sorted(publicado - codigo))
+              print("só no config:  ", sorted(codigo - publicado))
+              raise SystemExit(1)
+          print(f"llms.txt e config.py concordam: {len(codigo)} destinos")
+          PY
+
       - name: Configurar GitHub Pages
         uses: actions/configure-pages@v5
+
       - name: Enviar somente arquivos públicos do site
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site
+
       - name: Publicar site
         id: deployment
         uses: actions/deploy-pages@v5
