@@ -1,0 +1,18 @@
+# Pikachu Analyzer — API de segurança para agentes
+
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: Claude-Web
+User-agent: PerplexityBot
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: CCBot
+Allow: /
+
+User-agent: *
+Allow: /
+
+Sitemap: https://pikachu.tocadomacho.com/sitemap.xml
+
+# Mapa legível por LLM
+# llms.txt: https://pikachu.tocadomacho.com/llms.txt
