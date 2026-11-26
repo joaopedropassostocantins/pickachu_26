@@ -23,7 +23,8 @@ from src.payments import quote
 
 MAX_SOURCE_BYTES = 64 * 1024
 MAX_FINDINGS = 50
-PACK_PATH = Path("config/policies/diagnostic.yaml")
+_ROOT = Path(__file__).resolve().parents[2]
+PACK_PATH = _ROOT / "config" / "policies" / "diagnostic.yaml"
 ALLOWED_CHECKS = {"python_version", "platform", "cache_integrity"}
 
 # (id, severidade, padrão, título, correção)
