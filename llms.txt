@@ -1,0 +1,63 @@
+# Pikachu Analyzer
+
+> Scanner de segurança de cadeia de agente. Recebe código ou policy e devolve achados com PoC, ou veredito assinado. Cobrança por chamada em USDC na Base via x402.
+
+Base URL: https://pikachu.tocadomacho.com
+Protocolo: x402 v2
+Chamada gratuita: 100 por IP por dia, sem chave
+
+## Unidade
+
+Todos os valores estão em unidade atômica, 6 decimais.
+`20000` = US$ 0,02. `50000` = US$ 0,05.
+Não use dólar nem decimal em `authorization.value`.
+
+## Endpoints
+
+- [Scan de snippet](https://pikachu.tocadomacho.com/v1/scan/snippet): POST, corpo `{"code":"<fonte>"}`. Devolve lista de achados com severidade, arquivo e PoC. US$ 0,02 (20000).
+- [Verificar policy](https://pikachu.tocadomacho.com/v1/verify/policy): POST, corpo com a policy em YAML. Devolve veredito assinado com HMAC. US$ 0,05 (50000).
+- [Policy pack](https://pikachu.tocadomacho.com/v1/policy/pack/2026.11): GET. Devolve o pack assinado e versionado. US$ 0,02 (20000).
+
+## Pagamento
+
+Rede: `eip155:8453` (Base)
+Moeda: `0x833589fcd6edb6e08f4c7c32d4f71b54bda02913` (USDC)
+Esquema: `exact`, assinatura EIP-3009
+
+Destino por rota:
+
+- scan:   `0xa2108aa318f181f7233cd56866b75983d3c5e2cb`
+- verify: `0x2222222222222222222222222222222222222222`
+- pack:   `0x3333333333333333333333333333333333333333`
+
+## Fluxo
+
+1. Chame o endpoint sem pagamento.
+2. Receba `402` com header `PAYMENT-REQUIRED` (base64) e corpo JSON.
+3. Leia `accepts[0]`: `payTo`, `value`, `asset`, `network`.
+4. Assine a autorização EIP-3009 com `value` igual ao da oferta.
+5. Repita a mesma requisição, mesmo corpo, com os headers `PAYMENT-SIGNATURE` e `PAYMENT-QUOTE`.
+6. Receba `200` com o resultado e o header `PAYMENT-RESPONSE` com o hash.
+
+A cotação vale 120 segundos. Corpo alterado depois da cotação exige novo `GET`.
+
+## Erros
+
+Todo erro de pagamento volta como `402` com `error` e `hint`.
+
+- `invalid_quote` — cotação ausente, expirada ou adulterada. Refaça o passo 1.
+- `value_mismatch` — valor abaixo do preço ou em unidade errada.
+- `recipient_mismatch` — `payTo` diferente do endereço da rota.
+- `invalid_network` / `invalid_asset` — rede ou moeda fora da oferta.
+- `duplicate_nonce` — prova já usada. Assine uma nova autorização.
+- `settlement_pending` — liquidação em curso sem hash. Repita em 2 segundos.
+- `free_tier_exhausted` — limite do IP atingido. Pagar não espera.
+
+## MCP
+
+Servidor MCP com as três ferramentas: https://pikachu.tocadomacho.com/.well-known/mcp.json
+
+## Outros
+
+- [Estudo técnico](https://pikachu.tocadomacho.com/PAGINA.html): achados de segurança em cadeia de agente, com PoC.
+- [Código](https://github.com/joaopedropassostocantins/pickachu_26): fonte, MIT.
