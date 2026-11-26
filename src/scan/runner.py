@@ -3,6 +3,10 @@
 As regras são as classes de defeito levantadas na auditoria deste repositório,
 viradas regex. Nada é executado: só leitura do texto.
 
+A policy vive em dois lugares possíveis, e o pacote tem prioridade: dentro do
+wheel ela está em `src/scan/policies/`; no clone, em `config/policies/`. Sem a
+queda, `get_pack` funciona no repositório e falha em quem instalar.
+
 Limites que importam:
 - `MAX_SOURCE_BYTES` antes de qualquer varredura (A-12 do lado do servidor)
 - `MAX_FINDINGS` para a resposta não crescer sem teto
@@ -23,9 +27,21 @@ from src.payments import quote
 
 MAX_SOURCE_BYTES = 64 * 1024
 MAX_FINDINGS = 50
-_ROOT = Path(__file__).resolve().parents[2]
-PACK_PATH = _ROOT / "config" / "policies" / "diagnostic.yaml"
 ALLOWED_CHECKS = {"python_version", "platform", "cache_integrity"}
+
+_PKG_POLICY = Path(__file__).resolve().parent / "policies" / "diagnostic.yaml"
+_REPO_POLICY = Path(__file__).resolve().parents[2] / "config" / "policies" / "diagnostic.yaml"
+
+
+def _pack_path() -> Path:
+    """Pacote primeiro (wheel), repositório como queda (clone)."""
+    for candidate in (_PKG_POLICY, _REPO_POLICY):
+        if candidate.is_file():
+            return candidate
+    return _PKG_POLICY
+
+
+PACK_PATH = _pack_path()
 
 # (id, severidade, padrão, título, correção)
 _RULES: list[tuple[str, str, str, str, str]] = [
@@ -126,7 +142,7 @@ def _counts(findings: list[dict[str, Any]]) -> dict[str, int]:
 def _attest(payload: dict[str, Any]) -> str:
     """HMAC do veredito. Domínio separado da quote."""
     raw = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
-        return hmac.new(quote._key(), b"attest:" + raw, hashlib.sha256).hexdigest()
+    return hmac.new(quote._key(), b"attest:" + raw, hashlib.sha256).hexdigest()
 
 
 def verify_policy(raw: str) -> dict[str, Any]:
@@ -210,4 +226,5 @@ if __name__ == "__main__":
     demo = "import yaml\ndata = yaml.load(open('x').read())\ntry:\n    pass\nexcept:\n    pass\n"
     report = scan_code(demo)
     print(json.dumps(report, ensure_ascii=False, indent=2))
-    print("\npacote:", get_pack("2026.11")["policy_sha256"][:12])
+    print(f"\npolicy: {PACK_PATH}")
+    print("encontrada" if PACK_PATH.is_file() else "AUSENTE")
