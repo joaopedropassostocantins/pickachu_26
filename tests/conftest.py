@@ -30,3 +30,13 @@ def store():
     from src.payments import nonce
 
     return nonce.MemoryNonce()
+    
+    
+@pytest.fixture
+def conn():
+    """Conexão SQLite em memória, fechada ao fim do teste."""
+    import sqlite3
+
+    conexao = sqlite3.connect(":memory:")
+    yield conexao
+    conexao.close()
