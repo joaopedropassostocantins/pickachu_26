@@ -160,9 +160,10 @@ def accepts(route: str, base_url: str, **params: str) -> list[dict]:
 def assert_integrity() -> None:
     """Falha fechado se a configuração estiver inconsistente.
 
-    Roda no boot. Custa microssegundos e evita quatro classes de incidente:
-    endereço malformado, preço fora da política de estruturação, rota órfã
-    e rede resolvida para a chain errada.
+    Roda no boot. Custa microssegundos e evita seis classes de incidente:
+    endereço malformado, preço fora da política de estruturação, rota órfã,
+    recurso sem barra inicial, descrição faltando e rede resolvida para a
+    chain errada.
     """
     problems: list[str] = []
 
@@ -181,6 +182,18 @@ def assert_integrity() -> None:
             f"conjuntos divergentes: preço={sorted(PRICES_ATOMIC)} "
             f"payTo={sorted(PAY_TO)} rotas={sorted(RESOURCES)}"
         )
+
+    if set(DESCRIPTIONS) != set(RESOURCES):
+        problems.append(
+            f"DESCRIPTIONS não cobre exatamente as rotas: {sorted(DESCRIPTIONS)}"
+        )
+
+    for route, path in RESOURCES.items():
+        if not path.startswith("/"):
+            problems.append(f"{route}: resource deve começar com '/' ({path})")
+
+    if not 0 < MAX_TIMEOUT_SECONDS <= 600:
+        problems.append(f"MAX_TIMEOUT_SECONDS fora da faixa ({MAX_TIMEOUT_SECONDS})")
 
     for route, address in PAY_TO.items():
         if not _ADDRESS.match(address):
