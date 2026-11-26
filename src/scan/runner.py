@@ -13,14 +13,13 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
-import os
 import re
 from pathlib import Path
 from typing import Any
 
 import yaml
 
-from src.payments import config, quote
+from src.payments import quote
 
 MAX_SOURCE_BYTES = 64 * 1024
 MAX_FINDINGS = 50
