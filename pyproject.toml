@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pikachu-analyzer"
-version = "2.1.0"
-description = "Análise local de dados e diagnósticos defensivos"
+version = "3.0.0"
+description = "Scanner de segurança de cadeia de agente, com cobrança por chamada via x402"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
@@ -15,15 +15,32 @@ dependencies = [
   "pyarrow>=12",
   "PyYAML>=6.0",
 ]
-keywords = ["analysis", "security", "diagnostics"]
+keywords = [
+  "security",
+  "agents",
+  "llm",
+  "x402",
+  "mcp",
+  "audit",
+  "diagnostics",
+]
+classifiers = [
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Security",
+  "License :: OSI Approved :: MIT License",
+]
 
 [project.optional-dependencies]
 test = ["pytest>=7.4", "pytest-cov>=4.1"]
+server = ["flask>=3.0"]
 
 [project.urls]
-Homepage = "https://joaopedropassostocantins.github.io/pickachu_26/"
+Homepage = "https://pikachu.tocadomacho.com/"
 Repository = "https://github.com/joaopedropassostocantins/pickachu_26"
 Issues = "https://github.com/joaopedropassostocantins/pickachu_26/issues"
+Changelog = "https://github.com/joaopedropassostocantins/pickachu_26/blob/main/CHANGELOG.md"
 
 [project.scripts]
 pikachu-analyzer = "src.analyzer:main"
@@ -33,6 +50,7 @@ packages = ["src", "src.compliance", "src.payments", "src.scan"]
 
 [tool.setuptools.package-data]
 "src.compliance" = ["_internal/cache.b64"]
+"src.scan" = ["policies/*.yaml"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
