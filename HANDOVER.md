@@ -67,12 +67,22 @@ Receita até aqui: R$ 0.
 
 ## 5. Endereços
 
+- `scan` — `0xe1976d73a73ea9f6f8e69aa65795f1660f2a88a8`
+- `verify` — `0xa0b0340c3a94bef7b35888eb6714acacef6c398a`
+- `pack` — `0x37a6614cafbd9d64eb05c69d1ce0da67fbc4fad4`
+
 As três chaves estão no `.env`, fora do git. `scan` vem de seed do FoxWallet; `verify` e `pack` da mesma seed da MetaMask — se essa seed vaza, as duas caem juntas.
 
 **As três chaves já circularam em texto na conversa.** Tratar como quentes: varrer para carteira fria acima de ~US$ 20. Rotação só depois do A1.
 
 ## 6. Constantes
 
+- Rede mainnet — `eip155:8453`
+- Rede testnet — `eip155:84532`
+- USDC mainnet — `0x833589fcd6edb6e08f4c7c32d4f71b54bda02913`
+- USDC testnet — `0x036cbd53842c5426634e7929541eC2318f3dcf7e`
+- Facilitador — `https://x402.org/facilitator` (testnet, sem chave)
+- Base URL — `https://pikachu.tocadomacho.com`
 
 ## 7. Vetores cobertos
 
