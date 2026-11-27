@@ -68,9 +68,9 @@ DESCRIPTIONS: dict[str, str] = {
 # `python -m src.payments.config` para confirmar.
 
 PAY_TO: dict[str, str] = {
-    "scan": "0x1111111111111111111111111111111111111111",
-    "verify": "0x2222222222222222222222222222222222222222",
-    "pack": "0x3333333333333333333333333333333333333333",
+    "scan": "0xe1976d73a73ea9f6f8e69aa65795f1660f2a88a8",
+    "verify": "0xa0b0340c3a94bef7b35888eb6714acacef6c398a",
+    "pack": "0x37a6614cafbd9d64eb05c69d1ce0da67fbc4fad4",
 }
 
 _ADDRESS = re.compile(r"^0x[0-9a-fA-F]{40}$")

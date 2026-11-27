@@ -20,15 +20,15 @@ Não use dólar nem decimal em `authorization.value`.
 
 ## Pagamento
 
-Rede: `eip155:8453` (Base)
+Rede: `eip155:84532` (Base Sepolia)
 Moeda: `0x833589fcd6edb6e08f4c7c32d4f71b54bda02913` (USDC)
 Esquema: `exact`, assinatura EIP-3009
 
 Destino por rota:
 
-- scan:   `0xa2108aa318f181f7233cd56866b75983d3c5e2cb`
-- verify: `0x2222222222222222222222222222222222222222`
-- pack:   `0x3333333333333333333333333333333333333333`
+- scan:   `0xe1976d73a73ea9f6f8e69aa65795f1660f2a88a8`
+- verify: `0xa0b0340c3a94bef7b35888eb6714acacef6c398a`
+- pack:   `0x37a6614cafbd9d64eb05c69d1ce0da67fbc4fad4`
 
 ## Fluxo
 
