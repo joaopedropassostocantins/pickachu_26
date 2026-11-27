@@ -1,7 +1,7 @@
 # A1 - sonda do facilitador x402
 
 Testnet. Assinatura por chave descartavel, sem settle.
-Executado: 2026-11-27T01:58:07Z
+Executado: 2026-11-27T01:58:52Z
 
 ## /supported
 
@@ -15,7 +15,7 @@ HTTP 200
 ## /verify
 
 HTTP 200
-payer descartavel: 0xd4ee105313ec2ebb1589e4C54120BB463b457DB1
+payer descartavel: 0xF2AF1cfFAEC5ed396d2D7b2fA87e865B61dE71B6
 
 - isValid: False
 - invalidReason: invalid_exact_evm_insufficient_balance
