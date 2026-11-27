@@ -1,7 +1,7 @@
 # A1 - sonda do facilitador x402
 
 Testnet. Assinatura por chave descartavel, sem settle.
-Executado: 2026-11-27T01:56:03Z
+Executado: 2026-11-27T01:56:38Z
 
 ## /supported
 
@@ -12,7 +12,7 @@ HTTP 403
 ## /verify
 
 HTTP 403
-payer descartavel: 0xd0700020D111b1E5e05F7976571F7a17815105B9
+payer descartavel: 0x317c17Ae853863505e65FEE0F26d1F3636f38436
 
 - corpo nao e JSON
 
