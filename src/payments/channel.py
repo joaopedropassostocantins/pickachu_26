@@ -54,6 +54,8 @@ ERROR_HINTS: dict[str, str] = {
         "validBefore já passou; assine nova autorização"
     ),
     "settle_failed": "liquidação falhou; repita com a mesma prova",
+    "invalid_exact_evm_insufficient_balance": "a conta pagadora não tem USDC suficiente; deposite e assine nova autorização",
+    "invalid_exact_evm_insufficient_allowance": "allowance de USDC insuficiente; aprove o contrato USDC e repita",
 }
 
 
