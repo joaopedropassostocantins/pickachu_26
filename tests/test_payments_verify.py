@@ -45,16 +45,24 @@ def build(
 ):
     body = b'{"code":"x"}'
     now = int(time.time())
+    try:
+        to = config.pay_to(route)
+        unit = config.price(route)
+        accepted = config.accepts(route, 'https://x.invalid')[0]
+    except config.ConfigError:
+        # rota desconhecida: monta o que der; authorize reprova
+        to = '0x' + '11' * 20
+        unit = 0
+        accepted = {'scheme': config.SCHEME, 'network': config.network(), 'asset': config.asset(), 'payTo': to}
     auth = {
         "from": "0x" + "aa" * 20,
-        "to": config.pay_to(route),
-        "value": str(value if value is not None else config.price(route)),
+        "to": to,
+        "value": str(value if value is not None else unit),
         "validAfter": str(now - 5),
         "validBefore": str(now + 100),
         "nonce": nonce_value or "0x" + os.urandom(32).hex(),
     }
     auth.update(auth_extra or {})
-    accepted = config.accepts(route, "https://x.invalid")[0]
     accepted.update(accepted_extra or {})
     payload = {
         "x402Version": config.X402_VERSION if version is None else version,
@@ -62,7 +70,11 @@ def build(
         "payload": {"signature": "0xdead", "authorization": auth},
     }
     header = base64.b64encode(json.dumps(payload).encode()).decode()
-    return body, quote.issue(route, body), header
+    try:
+        token = quote.issue(route, body)
+    except quote.QuoteError:
+        token = 'x.y.z'  # rota sem preço: authorize reprova antes do check
+    return body, token, header
 
 
 def run(store, facilitator=None, route="scan", **kwargs):

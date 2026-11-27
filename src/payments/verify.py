@@ -213,6 +213,9 @@ def authorize(
     """Valida a prova inteira. Levanta `VerifyError` em qualquer falha."""
     current = int(now if now is not None else time.time())
 
+    # 0. rota: fora do catálogo é invalid_payload, antes do parsing
+    _price(route)
+
     # 1. cotação
     try:
         claims = quote.check(quote_token, route, body)
@@ -227,6 +230,15 @@ def authorize(
     if not isinstance(accepted, dict):
         raise VerifyError("invalid_payload")
     auth = extract_authorization(payload)
+    # Forma canônica: facilitador e settle esperam payload.payload.authorization.
+    inner = payload['payload']
+    if not isinstance(inner, dict):
+        raise VerifyError('invalid_payload')
+    while 'authorization' not in inner:
+        inner = inner.get('payload')
+        if not isinstance(inner, dict):
+            raise VerifyError('invalid_payload')
+    payload = {**payload, 'payload': inner}
 
     # 3. oferta
     expected = assert_offer(accepted, route)
