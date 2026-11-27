@@ -107,18 +107,22 @@ def scan_code(source: str) -> dict[str, Any]:
     lines = source.splitlines()
     findings: list[dict[str, Any]] = []
     for rule_id, severity, pattern, title, fix in _COMPILED:
-        for line_no, line in enumerate(lines, 1):
-            if pattern.search(line):
-                findings.append({
-                    "id": rule_id,
-                    "severity": severity,
-                    "line": line_no,
-                    "title": title,
-                    "evidence": line.strip()[:160],
-                    "fix": fix,
-                })
-                if len(findings) >= MAX_FINDINGS:
-                    break
+        seen: set[int] = set()
+        for match in pattern.finditer(source):
+            line_no = source.count("\n", 0, match.start()) + 1
+            if line_no in seen:
+                continue
+            seen.add(line_no)
+            findings.append({
+                "id": rule_id,
+                "severity": severity,
+                "line": line_no,
+                "title": title,
+                "evidence": lines[line_no - 1].strip()[:160],
+                "fix": fix,
+            })
+            if len(findings) >= MAX_FINDINGS:
+                break
         if len(findings) >= MAX_FINDINGS:
             break
 
@@ -222,20 +226,37 @@ def work(route: str, params: dict[str, str], body: bytes) -> dict[str, Any]:
     raise WorkError(f"rota sem trabalho: {route}")
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     import os
 
     os.environ.setdefault(quote.KEY_ENV, quote.genkey())
 
-    demo = "import yaml\ndata = yaml.load(open('x').read())\ntry:\n    pass\nexcept:\n    pass\n"
+    # Demo cobre P-05, P-08, P-10 e P-11.
+    demo = """\
+import yaml
+data = yaml.load(open('x').read())
+try:
+    pass
+except:
+    pass
+try:
+    pass
+except ValueError:
+    pass
+"""
     report = scan_code(demo)
     print(json.dumps(report, ensure_ascii=False, indent=2))
+    n = len(report['findings'])
+    print(f'\n{n} falha(s) encontrada(s)')
 
-    print(f"\npolicy: {PACK_PATH}")
+    print(f'\npolicy: {PACK_PATH}')
     if not PACK_PATH.is_file():
-        raise SystemExit("AUSENTE")
+        raise SystemExit('AUSENTE')
 
-    pack = get_pack("2026.11")
-    print(f"pack ok, atestação: {pack['attestation'][:16]}…")
-    veredito = verify_policy(PACK_PATH.read_text(encoding="utf-8"))
-    print(f"veredito válido: {veredito['valid']} · problemas: {len(veredito['problems'])}")
+    pack = get_pack('2026.11')
+    att = pack['attestation'][:16]
+    print(f'pack ok, atestação: {att}…')
+    veredito = verify_policy(PACK_PATH.read_text(encoding='utf-8'))
+    val = veredito['valid']
+    probs = len(veredito['problems'])
+    print(f'veredito válido: {val} · problemas: {probs}')
