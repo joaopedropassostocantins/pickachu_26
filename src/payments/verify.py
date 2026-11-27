@@ -38,6 +38,8 @@ _BYTES32 = re.compile(r"^0x[0-9a-fA-F]{64}$")
 _DIGITS = re.compile(r"^[0-9]{1,20}$")
 
 FACILITATOR_TIMEOUT = 10
+# Facilitador atras de Cloudflare: bloqueia UA de urllib com 1010.
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
 MAX_WINDOW_SECONDS = config.MAX_TIMEOUT_SECONDS * 10
 
 
@@ -89,7 +91,11 @@ class HttpFacilitator:
             self._base + path,
             data=body,
             method="POST",
-            headers={"Content-Type": "application/json"},
+            headers={
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "User-Agent": USER_AGENT,
+            },
         )
         try:
             with urllib.request.urlopen(request, timeout=self._timeout) as response:

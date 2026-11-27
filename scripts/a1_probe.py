@@ -14,6 +14,9 @@ from src.payments import config
 
 BASE = "https://x402.org/facilitator"
 CHAIN_ID = 84532
+
+UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+HDRS = {"User-Agent": UA, "Accept": "application/json"}
 REL = Path("docs/a1_sonda.md")
 
 TYPES = {
@@ -36,7 +39,7 @@ TYPES = {
 
 def get(path: str) -> tuple[int, str]:
     try:
-        with urllib.request.urlopen(BASE + path, timeout=20) as r:
+        with urllib.request.urlopen(urllib.request.Request(BASE + path, headers=HDRS), timeout=20) as r:
             return r.status, r.read().decode()
     except urllib.error.HTTPError as exc:
         return exc.code, exc.read().decode()
@@ -49,7 +52,7 @@ def post(path: str, body: dict) -> tuple[int, str]:
         BASE + path,
         data=json.dumps(body).encode(),
         method="POST",
-        headers={"Content-Type": "application/json"},
+        headers={**HDRS, "Content-Type": "application/json"},
     )
     try:
         with urllib.request.urlopen(req, timeout=20) as r:
