@@ -141,9 +141,9 @@ try:
     if verdict.get("isValid"):
         ok_assinatura = True
         linhas.append("- leitura: assinatura aceita e conta com saldo")
-    elif motivo == "insufficient_funds":
+    elif "insufficient" in motivo:
         ok_assinatura = True
-        linhas.append("- leitura: assinatura aceita; conta descartavel sem saldo")
+        linhas.append("- leitura: assinatura aceita; conta descartavel sem saldo (checagem de saldo atingida)")
     else:
         linhas.append("- leitura: recusado antes da checagem de saldo")
 except json.JSONDecodeError:
